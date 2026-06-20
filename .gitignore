@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+*.log
+*.jpg
+*.jpeg
+*.png
+*.pt
+*.wav
+.env
