@@ -15,20 +15,14 @@ HUMID_HIGH  = 80.0   # above this + hot -> compound heat stress
 ENV_RISK_MULTIPLIER = 0.5
 
 # Sound detection via USB microphone.
-# (INMP441 I2S didn't work reliably due to soldering issues -> switched to USB mic.)
-# We capture a short audio block via arecord and compute its RMS level.
-# If RMS >= SOUND_RMS_THRESHOLD, treat as "sound present".
-
-# Re-enabled: USB mic is connected and working.
 SOUND_ENABLED = True
 
 # USB mic settings (verified on AB13X USB Audio, card 2)
-I2S_SAMPLE_RATE   = 44100           # USB mic native rate
-I2S_CHANNELS      = 1               # mono
-I2S_DEVICE        = "plughw:2"      # check with `arecord -l`
-I2S_FORMAT        = "S16_LE"        # 16-bit signed little-endian
-SOUND_WINDOW_SEC  = 1.0             # seconds of audio per check
-# Measured baseline: quiet~49, talking~163, TV~164. Threshold 100 splits cleanly.
+I2S_SAMPLE_RATE   = 44100
+I2S_CHANNELS      = 1
+I2S_DEVICE        = "plughw:2"
+I2S_FORMAT        = "S16_LE"
+SOUND_WINDOW_SEC  = 1.0
 SOUND_RMS_THRESHOLD = 150
 
 # Debug: force RMS to this value (None = real measurement)
@@ -44,12 +38,10 @@ CAPTURE_INTERVAL_S  = 5
 # YOLO model
 YOLO_MODEL_PATH     = "yolov8n-pose.pt"
 YOLO_CONF_THRESHOLD = 0.5
-POSE_LYING_RATIO    = 0.6   # (side view) head_y/ankle_y ratio threshold
+POSE_LYING_RATIO    = 0.6
 
 # Camera mount: "side" or "top" (ceiling).
 CAMERA_MOUNT = "top"
-# (top view) keypoint spread ratio: if max keypoint span / bbox diagonal
-# exceeds this, the body is stretched out -> lying. Standing looks compact.
 TOP_LYING_SPREAD = 0.45
 
 # COCO keypoint indices
@@ -58,7 +50,6 @@ KP_LEFT_ANKLE   = 15
 KP_RIGHT_ANKLE  = 16
 
 # Safe zones: normalized coords (x1, y1, x2, y2)
-# If ~/guardianeye/zones.json exists (created by zone_setter.py), use it instead.
 _DEFAULT_SAFE_ZONES = [
     ("bed",   0.55, 0.0,  1.0,  0.7),
     ("sofa",  0.0,  0.0,  0.45, 0.5),
@@ -78,19 +69,23 @@ def _load_zones():
 
 SAFE_ZONES = _load_zones()
 
-# Timers (seconds)
-TIMER_DANGER_SILENT = 8   # danger zone + silent
-TIMER_DANGER_SOUND  = 20   # danger zone + sound
-TIMER_SAFE_SILENT   = 10   # safe zone   + silent
-TIMER_SAFE_SOUND    = 30   # safe zone   + sound
+# Timers (seconds) — production values for real elderly monitoring deployment
+# Demo filming used shortened values (8~30s); these reflect realistic inactivity windows.
+TIMER_DANGER_SILENT = 600    # danger zone + silent  (10 min)
+TIMER_DANGER_SOUND  = 1200   # danger zone + sound   (20 min)
+TIMER_SAFE_SILENT   = 1800   # safe zone   + silent  (30 min)
+TIMER_SAFE_SOUND    = 3600   # safe zone   + sound   (60 min)
 
-BUZZER_CONFIRM_WAIT = 10
+# With ENV_RISK_MULTIPLIER=0.5 applied on heat/cold, effective minimums:
+#   danger+silent+heat -> 300s (5 min)
+#   danger+silent+heat+humid -> 240s (4 min)
+
+BUZZER_CONFIRM_WAIT = 60   # seconds to wait after buzzer before sending alert
 
 # Buzzer pattern (on_sec, off_sec, repeat)
 BUZZER_PATTERN = (0.5, 0.5, 5)
 
-# Buzzer tone frequency in Hz. 440 = A4 ("la").
-# Other notes: C4=262, D4=294, E4=330, F4=349, G4=392, A4=440, B4=494, C5=523
+# Buzzer tone frequency in Hz
 BUZZER_FREQ_HZ = 440
 
 # Alert settings
@@ -101,7 +96,7 @@ ALERT_EMAIL_PASS   = ""
 ALERT_SMTP_HOST    = "smtp.gmail.com"
 ALERT_SMTP_PORT    = 587
 
-# Telegram bot alerts (get token from @BotFather, chat_id from getUpdates)
+# Telegram bot alerts
 ALERT_TELEGRAM_TOKEN   = "8557719007:AAG6o58UEVsaU--3HpmSW_9YRsRUvjcWPgQ"
 ALERT_TELEGRAM_CHAT_ID = "6314466046"
 
